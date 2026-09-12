@@ -57,7 +57,20 @@ test("deterministic recap consolidates repeated generic fronts instead of repeat
     activity("a2", "2026-09-10T20:00:00Z"),
     activity("a3", "2026-09-12T08:00:00Z"),
   ]);
-  assert.ok(input.workstreams.length >= 2, "fixture should exercise report-level consolidation across separate workstreams");
+
+  // Force three separate report-time fronts to reproduce the real long-period
+  // failure mode even if the lower-level Workstream engine has already learned
+  // to group this particular fixture more aggressively.
+  const base = input.workstreams[0];
+  const byId = new Map(input.projects.flatMap((p) => p.activities).map((a) => [a.id, a]));
+  input.workstreams = ["a1", "a2", "a3"].map((id, i) => ({
+    ...base,
+    id: `w${i + 1}`,
+    activities: [byId.get(id)!],
+    significance: base.significance / 3,
+    startedAt: byId.get(id)!.startedAt,
+    endedAt: byId.get(id)!.endedAt ?? byId.get(id)!.startedAt,
+  }));
 
   const analysis = buildDeterministicAnalysis(input);
   assert.equal(analysis.investigations.length, 1, "repeated API investigation fronts should be one recap item");
