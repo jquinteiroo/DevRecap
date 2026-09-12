@@ -48,9 +48,9 @@ DevRecap combines session evidence with Git history and keeps uncertain work unc
 Without DevRecap:
 
 ```text
-I think I worked on the PDF flow...
-There were some DocuSign changes...
-I also fixed something in the frontend.
+I think I worked on the PDF generation flow...
+I also fixed something in the product-selection flow.
+And I investigated a bit the issues with the reports.
 ```
 
 With DevRecap:
@@ -61,13 +61,14 @@ This week
 Completed
 • Improved the contract-generation flow and correlated the work with Git commits.
 • Fixed frontend behavior in the product-selection journey.
-• Added report-generation improvements backed by session and repository evidence.
+• Investigated several issues with the reports generation.
 
-In progress
-• PDF/AcroForm integration remains under active development.
+In Progress
+• New users creation (admin panel).
+• Solving new issues with reports.
 
 Technical areas
-Vue · PDF · DocuSign · Git · Node.js
+Vue · PDF · Node.js · Git
 ```
 
 The goal is not to make your week sound busier.
@@ -127,7 +128,7 @@ npm run setup
 Run DevRecap directly from the repository:
 
 ```bash
-npm run recap -- "essa semana"
+npm run recap -- "this week"
 ```
 
 Or link the CLI globally while developing:
@@ -139,7 +140,7 @@ npm link
 Then:
 
 ```bash
-devrecap "essa semana"
+devrecap "this week"
 ```
 
 The generated HTML report is written to `reports/`.
@@ -149,31 +150,31 @@ The generated HTML report is written to `reports/`.
 Ask naturally:
 
 ```bash
-devrecap "hoje"
+devrecap "today"
 ```
 
 ```bash
-devrecap "essa semana"
+devrecap "this week"
 ```
 
 ```bash
-devrecap "últimos 7 dias"
+devrecap "last 7 days"
 ```
 
 Choose a reporting style:
 
 ```bash
-devrecap "essa semana" --style executive
+devrecap "this week" --style executive
 ```
 
 ```bash
-devrecap "essa semana" --style technical
+devrecap "this week" --style technical
 ```
 
 Control the amount of detail:
 
 ```bash
-devrecap "últimos 14 dias" --length detailed
+devrecap "last 14 days" --length detailed
 ```
 
 Choose an exact period:
@@ -185,7 +186,7 @@ devrecap --from 2026-09-01 --to 2026-09-12
 Generate HTML and request a PDF:
 
 ```bash
-devrecap "essa semana" \
+devrecap "this week" \
   --out reports/week.html \
   --pdf reports/week.pdf
 ```
@@ -193,9 +194,9 @@ devrecap "essa semana" \
 Disable individual evidence sources when needed:
 
 ```bash
-devrecap "essa semana" --no-claude
-devrecap "essa semana" --no-codex
-devrecap "essa semana" --no-git
+devrecap "this week" --no-claude
+devrecap "this week" --no-codex
+devrecap "this week" --no-git
 ```
 
 ## Use it as a skill
@@ -218,7 +219,7 @@ $devrecap
 Or ask for a specific recap:
 
 ```text
-$devrecap essa semana
+$devrecap this week
 ```
 
 The skill follows an evidence-controlled workflow:
@@ -252,7 +253,7 @@ The agent is instructed to:
 For the deterministic flow:
 
 ```bash
-devrecap "essa semana"
+devrecap "this week"
 ```
 
 ### Prepare
@@ -261,7 +262,7 @@ Collect and structure the evidence:
 
 ```bash
 devrecap prepare \
-  --request "essa semana" \
+  --request "this week" \
   --out .devrecap/run.json
 ```
 
@@ -424,7 +425,7 @@ npm run setup
 Run the CLI:
 
 ```bash
-npm run recap -- "essa semana"
+npm run recap -- "this week"
 ```
 
 Run the local app:
@@ -469,7 +470,7 @@ If DevRecap becomes useful in your workflow, consider starring the repository. I
 
 ## License
 
-MIT.
+MIT. [LICENSE](https://github.com/jquinteiroo/devrecap/blob/main/LICENSE)
 
 ---
 
