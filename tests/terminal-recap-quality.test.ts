@@ -218,7 +218,7 @@ test("commit-like file titles are presented as human-readable deliveries", () =>
       gitAction: "committed",
       committed: true,
       objective: "",
-      intents: ["atualizar o README"],
+      intents: ["preciso atualizar o README"],
       topicProfile: { domainTerms: [], technologies: [], components: [], actions: [], primarySignal: "" },
     },
   });
