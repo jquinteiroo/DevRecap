@@ -68,6 +68,23 @@ export function collectGitHistory(projectDirs: string[], range: CollectionRange)
 export function discoverProjectDirectories(events: RawEvent[], includeCwd = true): string[] { const dirs = new Set<string>(); for (const event of events) if (event.cwd) dirs.add(resolve(event.cwd)); if (includeCwd) dirs.add(resolve(process.cwd())); return [...dirs]; }
 export function projectRootForCwd(cwd: string | undefined, gitRoots: string[]): string | undefined { if (!cwd) return undefined; const resolved = resolve(cwd); return [...gitRoots].sort((a,b)=>b.length-a.length).find((root)=>resolved===root || resolved.startsWith(root + sep)) ?? resolved; }
 
+/**
+ * Hard safety boundary for terminal Git access. The collector is deliberately
+ * read-only: only the exact Git query shapes DevRecap needs are allowed. Any
+ * future mutating command (add/commit/push/switch/reset/etc.) fails before Git
+ * is invoked.
+ */
+export function assertReadOnlyGitArgs(args: string[]): void {
+  const [command, ...rest] = args;
+  let allowed = false;
+  if (command === "rev-parse") allowed = rest.length === 1 && rest[0] === "--show-toplevel";
+  else if (command === "config") allowed = rest.length === 1 && (rest[0] === "user.email" || rest[0] === "user.name");
+  else if (command === "log") allowed = rest.length >= 1 && rest.every((arg) => arg.startsWith("--"));
+  else if (command === "remote") allowed = rest.length === 2 && rest[0] === "get-url" && rest[1] === "origin";
+  else if (command === "branch") allowed = rest.length === 1 && rest[0] === "--show-current";
+  if (!allowed) throw new Error(`DevRecap refused non-read-only Git command: git ${args.join(" ")}`);
+}
+
 function claudeRecordToRawEvents(record: Record<string, unknown>, seq: number, raw: string): RawEvent[] {
   const type = typeof record.type === "string" ? record.type : ""; if (type !== "user" && type !== "assistant") return [];
   const message = record.message && typeof record.message === "object" ? record.message as Record<string, unknown> : {};
@@ -98,5 +115,5 @@ function safeReadDir(path:string):string[]{try{return readdirSync(path)}catch{re
 function safeIsDirectory(path:string):boolean{try{return statSync(path).isDirectory()}catch{return false}}
 function safeIsFile(path:string):boolean{try{return statSync(path).isFile()}catch{return false}}
 function safeGit(root:string,args:string[]):string{try{return git(root,args)}catch{return ""}}
-function git(root:string,args:string[]):string{return execFileSync("git",["-C",root,...args],{encoding:"utf8",stdio:["ignore","pipe","ignore"],maxBuffer:20*1024*1024})}
+function git(root:string,args:string[]):string{assertReadOnlyGitArgs(args);return execFileSync("git",["-C",root,...args],{encoding:"utf8",stdio:["ignore","pipe","ignore"],maxBuffer:20*1024*1024})}
 function errorMessage(error:unknown):string{return error instanceof Error?error.message:String(error)}
