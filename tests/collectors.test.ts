@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { collectClaudeSessions } from "@devrecap/collectors";
+import { assertReadOnlyGitArgs, collectClaudeSessions } from "@devrecap/collectors";
 import { normalizeEvents } from "@devrecap/activity-engine";
 
 test("Claude collector feeds the shared event pipeline", () => {
@@ -21,4 +21,34 @@ test("Claude collector feeds the shared event pipeline", () => {
     assert.ok(normalized.some((e) => e.kind === "user_request"));
     assert.ok(normalized.some((e) => e.kind === "file_edit"));
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("Git collector allowlist accepts only read-only query shapes", () => {
+  assert.doesNotThrow(() => assertReadOnlyGitArgs(["rev-parse", "--show-toplevel"]));
+  assert.doesNotThrow(() => assertReadOnlyGitArgs(["config", "user.email"]));
+  assert.doesNotThrow(() => assertReadOnlyGitArgs(["config", "user.name"]));
+  assert.doesNotThrow(() => assertReadOnlyGitArgs(["log", "--since=2026-09-01", "--until=2026-09-12", "--name-only"]));
+  assert.doesNotThrow(() => assertReadOnlyGitArgs(["remote", "get-url", "origin"]));
+  assert.doesNotThrow(() => assertReadOnlyGitArgs(["branch", "--show-current"]));
+});
+
+test("Git collector refuses repository-mutating commands", () => {
+  for (const args of [
+    ["add", "."],
+    ["commit", "-m", "nope"],
+    ["push"],
+    ["pull"],
+    ["switch", "main"],
+    ["checkout", "main"],
+    ["reset", "--hard"],
+    ["restore", "."],
+    ["merge", "main"],
+    ["rebase", "main"],
+    ["clean", "-fd"],
+    ["config", "user.email", "write@example.com"],
+    ["remote", "set-url", "origin", "https://example.invalid/repo.git"],
+    ["branch", "-D", "feature"],
+  ]) {
+    assert.throws(() => assertReadOnlyGitArgs(args), /refused non-read-only Git command/);
+  }
 });
