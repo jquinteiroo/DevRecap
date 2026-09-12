@@ -166,7 +166,7 @@ test("tooling residue such as 'main event' falls back to an honest investigation
       workKind: "primary",
       topicKey: "app",
       objective: "Investigate the main event",
-      intents: ["investigar o fluxo"],
+      intents: ["preciso investigar o fluxo"],
       topicProfile: {
         domainTerms: ["main", "event"], technologies: [], components: [], actions: ["investigate"], primarySignal: "main",
       },
@@ -218,6 +218,7 @@ test("commit-like file titles are presented as human-readable deliveries", () =>
       gitAction: "committed",
       committed: true,
       objective: "",
+      intents: ["atualizar o README"],
       topicProfile: { domainTerms: [], technologies: [], components: [], actions: [], primarySignal: "" },
     },
   });
