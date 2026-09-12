@@ -289,7 +289,7 @@ function parseOptions(args: string[], preset?: CommandPreset): CliOptions {
   }
 
   const positional = requestParts.join(" ").trim();
-  const request = String(values.request ?? positional || preset?.request || "this week");
+  const request = String(values.request ?? (positional || preset?.request || "this week"));
   const style = oneOf(values.style, ["spoken", "professional", "executive", "technical"], preset?.style ?? "professional") as ReportStyle;
   const length = oneOf(values.length, ["short", "normal", "detailed"], preset?.length ?? "normal") as ReportLength;
   const locale = String(values.lang ?? "") === "pt-BR" || looksPortuguese(request) ? "pt-BR" : "en";
