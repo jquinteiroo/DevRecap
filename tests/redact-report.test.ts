@@ -64,13 +64,23 @@ test("buildReportInput excludes personal/university for work reports", () => {
   assert.ok(!names.includes("Coursework Project"), "university project excluded");
 });
 
-test("buildReportInput infers next steps from in_progress activities", () => {
+test("buildReportInput does not infer next steps from in_progress activities", () => {
   const { acts, projects } = fixture();
   const { input } = buildReportInput(acts, projects, {
     kind: "daily", style: "professional", length: "normal",
     range: { start: "2026-09-01", end: "2026-09-30" },
   });
-  assert.ok(input.nextSteps.some((s) => s.includes("Demo API")));
+  assert.deepEqual(input.nextSteps, [], "open work is not automatically a next step");
+});
+
+test("buildReportInput preserves an explicit evidence-backed next step", () => {
+  const { acts, projects } = fixture();
+  acts[1].metadata = { nextSteps: ["Validate the Demo API response with the supervisor"] };
+  const { input } = buildReportInput(acts, projects, {
+    kind: "daily", style: "professional", length: "normal",
+    range: { start: "2026-09-01", end: "2026-09-30" },
+  });
+  assert.deepEqual(input.nextSteps, ["Validate the Demo API response with the supervisor"]);
 });
 
 test("deterministic daily spoken report respects the duration budget", async () => {
@@ -81,7 +91,6 @@ test("deterministic daily spoken report respects the duration budget", async () 
   });
   const { content } = await new DeterministicProvider().generateReport(input);
   const words = content.split(/\s+/).length;
-  // 30s * ~2.5 wps ≈ 75 words; allow slack for the final sentences.
   assert.ok(words <= 110, `spoken report should be concise (was ${words} words)`);
   assert.ok(content.length > 0);
 });
