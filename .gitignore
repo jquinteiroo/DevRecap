@@ -1,0 +1,12 @@
+node_modules/
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+data/imports/
+.devrecap/
+reports/
+*.log
+.DS_Store
+dist/
+.env

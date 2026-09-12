@@ -1,0 +1,20 @@
+commit dc48b95e1f2a3b4c5d6e7f8091a2b3c4d5e6f708
+Author: Dev Tester <dev@example.com>
+Date:   2026-09-09 09:15:00 +0000
+
+    fix(sample-dashboard): item selection
+
+    Corrected the item filter so inactive items are excluded.
+
+ src/components/SampleDashboard.tsx     | 12 ++++++----
+ src/controllers/WidgetController.ts    |  4 +++
+ 2 files changed, 12 insertions(+), 4 deletions(-)
+
+commit a1b2c3d4e5f60718293a4b5c6d7e8f9012345678
+Author: Dev Tester <dev@example.com>
+Date:   2026-09-09 11:05:00 +0000
+
+    feat: add demo-api client wrapper
+
+ src/services/demo-api/ApiClient.ts | 40 ++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)

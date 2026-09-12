@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Cross-platform: the Windows job specifically exercises the workspace
+        # linker so the EPERM / junction regression cannot return unnoticed.
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 24 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Print Node version
+        run: node --version
+
+      # Exercises scripts/link-workspaces.mjs (junction on Windows, dir on
+      # Unix). Fails loudly if a link does not resolve — this is the guard
+      # against the Windows EPERM regression.
+      - name: Set up workspace links
+        run: npm run setup
+
+      - name: Run tests
+        run: npm test
+
+      - name: Server health smoke test
+        run: npm run smoke

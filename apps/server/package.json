@@ -1,0 +1,14 @@
+{
+  "name": "@devrecap/server",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@devrecap/shared": "*",
+    "@devrecap/import-core": "*",
+    "@devrecap/codex-parser": "*",
+    "@devrecap/git-parser": "*",
+    "@devrecap/activity-engine": "*",
+    "@devrecap/report-engine": "*"
+  }
+}

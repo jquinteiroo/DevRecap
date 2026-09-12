@@ -1,0 +1,7 @@
+interface:
+  display_name: "DevRecap"
+  short_description: "Turn coding sessions and Git into evidence-backed work reports"
+  default_prompt: "Use $devrecap to reconstruct my recent coding activity from local sessions and Git, analyze only evidence-backed work, and generate a presentation-ready report."
+
+policy:
+  allow_implicit_invocation: false

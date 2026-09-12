@@ -1,0 +1,12 @@
+{"timestamp":"2026-09-09T08:17:00.000Z","type":"session_meta","payload":{"id":"abc123","cwd":"/home/user/example-project","cli_version":"0.65.0","source":"cli","git":{"branch":"main","commit":"dc48b95"}}}
+{"timestamp":"2026-09-09T08:17:05.000Z","type":"turn_context","payload":{"model":"o4-mini"}}
+{"timestamp":"2026-09-09T08:17:10.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"The item selection in the sample dashboard is broken, please investigate."}]}}
+{"timestamp":"2026-09-09T08:18:00.000Z","type":"response_item","payload":{"type":"function_call","name":"shell","arguments":"{\"command\":[\"bash\",\"-lc\",\"grep -rn itemId src/components/SampleDashboard.tsx\"]}","call_id":"call_1"}}
+{"timestamp":"2026-09-09T08:18:02.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_1","output":"src/components/SampleDashboard.tsx:42: itemId"}}
+THIS IS A MALFORMED LINE {not json}
+{"timestamp":"2026-09-09T08:42:00.000Z","type":"response_item","payload":{"type":"function_call","name":"shell","arguments":"{\"command\":[\"bash\",\"-lc\",\"apply_patch\"]}","call_id":"call_2"}}
+{"timestamp":"2026-09-09T08:42:30.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":"Updated src/components/SampleDashboard.tsx to fix the item filter."}}
+{"timestamp":"2026-09-09T09:03:00.000Z","type":"response_item","payload":{"type":"function_call","name":"shell","arguments":"{\"command\":[\"bash\",\"-lc\",\"npm test -- --filter=SampleDashboardTest\"]}","call_id":"call_3"}}
+{"timestamp":"2026-09-09T09:03:20.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_3","output":"PASS tests/SampleDashboardTest\nTests: 4 passed"}}
+{"timestamp":"2026-09-09T09:15:00.000Z","type":"response_item","payload":{"type":"function_call","name":"shell","arguments":"{\"command\":[\"bash\",\"-lc\",\"git commit -m 'fix(sample-dashboard): item selection'\"]}","call_id":"call_4"}}
+{"timestamp":"2026-09-09T09:33:00.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"total_tokens":12000}}}}
