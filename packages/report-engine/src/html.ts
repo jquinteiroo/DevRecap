@@ -4,7 +4,7 @@ import type { AnalysisItem, ReportAnalysis } from "./analysis.ts";
 export interface HtmlReportOptions { locale?: "en" | "pt-BR"; title?: string; }
 
 export function renderHtmlReport(input: ReportInput, analysis: ReportAnalysis, options: HtmlReportOptions = {}): string {
-  const pt = options.locale === "pt-BR";
+  const pt = input.language === "pt" || (input.language === "auto" && (input.resolvedLanguage === "pt" || options.locale === "pt-BR"));
   const activities = input.projects.flatMap((p) => p.activities);
   const byId = new Map(activities.map((a) => [a.id, a]));
   const done = activities.filter((a) => a.status === "completed").length;
