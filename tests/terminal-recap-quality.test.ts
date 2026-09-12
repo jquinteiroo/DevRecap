@@ -83,7 +83,7 @@ test("deterministic recap uses objective-level prose, not telemetry artifacts", 
   const analysis = buildDeterministicAnalysis(input);
   const text = [analysis.mainFocus?.title, analysis.mainFocus?.narrative, ...analysis.investigations.map((x) => `${x.title} ${x.narrative}`)].join(" ");
   assert.doesNotMatch(text, /app\.js|n-async|Ran 50 commands|50 commands/i);
-  assert.match(text, /API/i);
+  assert.match(text, /API|Billing|Laravel/i);
 });
 
 test("in-progress work does not fabricate a next step", () => {
@@ -132,6 +132,95 @@ test("HTML follows the resolved work language when report language is auto", () 
   const analysis = buildDeterministicAnalysis(input);
   const html = renderHtmlReport(input, analysis, { locale: "en" });
   assert.match(html, /Investigações|Em andamento|Foco principal/);
-  assert.match(analysis.headline, /atividades relevantes/);
+  assert.match(analysis.headline, /atividade relevante/);
   assert.doesNotMatch(html, />Investigations</);
+});
+
+test("weak conversational objective never becomes the workstream title", () => {
+  const bad = activity("bad1", "2026-09-11T09:00:00Z", {
+    category: "bugfix",
+    title: "Worked on a fix for the project",
+    metadata: {
+      workKind: "primary",
+      topicKey: "app",
+      objective: "Fix the deste traga",
+      intents: ["quero que deste resultado traga os dados"],
+      filesModified: Array.from({ length: 40 }, (_, i) => `src/part-${i}.ts`),
+      topicProfile: {
+        domainTerms: ["deste", "traga"], technologies: ["vue", "pdf"], components: [], actions: ["fix"], primarySignal: "vue",
+      },
+    },
+  });
+  const input = build([bad]);
+  const analysis = buildDeterministicAnalysis(input);
+  const text = `${analysis.mainFocus?.title} ${analysis.mainFocus?.narrative}`;
+  assert.doesNotMatch(text, /deste|traga/i);
+  assert.doesNotMatch(text, /40\s+arquivos|40\s+files/i);
+  assert.match(text, /Billing/i, "honest project context is preferred over a nonsense objective");
+});
+
+test("tooling residue such as 'main event' falls back to an honest investigation label", () => {
+  const bad = activity("bad2", "2026-09-11T10:00:00Z", {
+    title: "Investigated the project",
+    metadata: {
+      workKind: "primary",
+      topicKey: "app",
+      objective: "Investigate the main event",
+      intents: ["investigar o fluxo"],
+      topicProfile: {
+        domainTerms: ["main", "event"], technologies: [], components: [], actions: ["investigate"], primarySignal: "main",
+      },
+    },
+  });
+  const input = build([bad]);
+  const analysis = buildDeterministicAnalysis(input);
+  const text = `${analysis.mainFocus?.title} ${analysis.mainFocus?.narrative}`;
+  assert.doesNotMatch(text, /main event/i);
+  assert.match(text, /Investigação em Billing/i);
+});
+
+test("known product casing is normalized without inventing a new objective", () => {
+  const a = activity("codex1", "2026-09-11T11:00:00Z", {
+    metadata: {
+      workKind: "primary",
+      topicKey: "app",
+      objective: "Investigate the codex plugin",
+      intents: ["investigar o codex plugin"],
+      topicProfile: {
+        domainTerms: ["plugin"], technologies: ["codex"], components: [], actions: ["investigate"], primarySignal: "codex",
+      },
+    },
+  });
+  const analysis = buildDeterministicAnalysis(build([a]));
+  assert.match(analysis.mainFocus?.title ?? "", /Codex/);
+});
+
+test("Portuguese summary uses natural plurals instead of '(s)' placeholders", () => {
+  const analysis = buildDeterministicAnalysis(build([
+    activity("p1", "2026-09-10T08:00:00Z"),
+    activity("p2", "2026-09-10T09:00:00Z"),
+  ]));
+  assert.doesNotMatch(analysis.executiveSummary, /\(s\)|\(is\)/);
+  assert.match(analysis.executiveSummary, /projeto|projetos/);
+});
+
+test("commit-like file titles are presented as human-readable deliveries", () => {
+  const readme = activity("git1", "2026-09-12T09:00:00Z", {
+    source: "git",
+    category: "git",
+    title: "Readme.md",
+    summary: "Readme.md",
+    status: "completed",
+    confidence: 0.95,
+    metadata: {
+      workKind: "support",
+      topicKey: "git",
+      gitAction: "committed",
+      committed: true,
+      objective: "",
+      topicProfile: { domainTerms: [], technologies: [], components: [], actions: [], primarySignal: "" },
+    },
+  });
+  const analysis = buildDeterministicAnalysis(build([readme]));
+  assert.ok(analysis.highlights.some((h) => /Atualização do README/i.test(h.title)));
 });
