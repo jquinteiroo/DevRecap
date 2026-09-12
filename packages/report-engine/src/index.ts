@@ -10,6 +10,7 @@ export * from "./composer.ts";
 export {
   buildAnalysisContract,
   buildAnalysisPrompt,
+  validateReportAnalysis,
   type AnalysisItem,
   type ReportAnalysis,
   type AnalysisOptions,
@@ -17,7 +18,6 @@ export {
 } from "./analysis.ts";
 export {
   buildDeterministicAnalysis,
-  validateReportAnalysis,
 } from "./analysis-quality.ts";
 export * from "./html.ts";
 
