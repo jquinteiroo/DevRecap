@@ -1,0 +1,39 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "devrecap",
+  "version": "0.2.0",
+  "description": "Reconstruct evidence-backed developer work from authorized local coding history and let Codex turn it into polished recaps.",
+  "author": {
+    "name": "João Quinteiro",
+    "url": "https://github.com/jquinteiroo"
+  },
+  "homepage": "https://github.com/jquinteiroo/devrecap",
+  "repository": "https://github.com/jquinteiroo/devrecap",
+  "license": "MIT",
+  "keywords": [
+    "developer-productivity",
+    "daily-standup",
+    "work-recap",
+    "codex",
+    "git"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "DevRecap",
+        "shortDescription": "Turn coding history into AI-written work recaps.",
+        "longDescription": "DevRecap reconstructs what you actually worked on from explicitly authorized local Codex/Claude history and read-only Git evidence. Codex then synthesizes those structured facts into polished daily standups, weekly reviews, sprint recaps, and memory reports without inventing completed work.",
+        "developerName": "João Quinteiro",
+        "category": "Productivity",
+        "websiteURL": "https://github.com/jquinteiroo/devrecap",
+        "privacyPolicyURL": "https://github.com/jquinteiroo/devrecap/blob/main/PRIVACY.md",
+        "defaultPrompt": [
+          "Use DevRecap to help me remember what I worked on this week.",
+          "Use DevRecap to prepare my daily standup in Portuguese.",
+          "Use DevRecap to create a detailed review of the last 14 days."
+        ],
+        "brandColor": "#111111"
+      }
+    }
+  }
+}
