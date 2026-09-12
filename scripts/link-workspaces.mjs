@@ -25,6 +25,7 @@ import { fileURLToPath } from "node:url";
 // special privileges on Windows and is ignored (treated as "dir") elsewhere.
 // This keeps `npm run setup` working for normal users on Windows, macOS, Linux.
 const LINK_TYPE = process.platform === "win32" ? "junction" : "dir";
+const QUIET = process.env.DEVRECAP_LINK_QUIET === "1";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const nm = join(root, "node_modules");
@@ -62,7 +63,7 @@ for (const d of dirs) {
     );
   }
   linked++;
-  process.stdout.write(`linked ${name} -> packages/${d}\n`);
+  if (!QUIET) process.stdout.write(`linked ${name} -> packages/${d}\n`);
 }
 
 if (linked === 0) {
