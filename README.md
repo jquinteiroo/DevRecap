@@ -1,233 +1,479 @@
-# DevRecap
+<p align="center">
+  <img src="assets/devrecap-logo.webp" width="220" alt="DevRecap logo">
+</p>
 
-**Terminal-first, local-first developer work recaps with evidence behind every claim.**
+<h1 align="center">DevRecap</h1>
 
-DevRecap reconstructs what you worked on from coding-assistant history and Git metadata, turns it into meaningful Activities and Workstreams, and produces recaps for dailies, weekly reviews, sprint reviews, memory refreshes, and personal work journals.
+<p align="center">
+  <em>Your coding history already knows what you did. DevRecap turns it into a recap.</em>
+</p>
 
-The product now has two intentionally different modes:
+<p align="center">
+  <img src="https://img.shields.io/github/stars/jquinteiroo/devrecap?style=flat-square&color=111111&label=stars" alt="GitHub stars">
+  <img src="https://img.shields.io/badge/node-%3E%3D24-111111?style=flat-square" alt="Node.js 24+">
+  <img src="https://img.shields.io/badge/skill-Codex%20%2B%20Claude-111111?style=flat-square" alt="Codex and Claude skill">
+  <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT license">
+</p>
 
-- **CLI / Skill mode** — optional local Codex, Claude Code, and read-only Git collectors. These collectors run only after explicit `devrecap setup` authorization.
-- **Web mode** — manual file import only. The browser/server never scans local development folders automatically.
+<p align="center">
+  <strong>Codex + Claude + Git → evidence-backed developer recaps.</strong>
+</p>
 
 ---
 
-## Terminal quick start
+You know the question.
 
-Requirements: **Node.js 24 LTS** (`>=24.0.0`).
+**“What did I actually work on this week?”**
 
-```bash
-npm run setup
-npm run recap -- setup
-npm run recap -- sources
-npm run recap -- today
-```
+Then you open GitHub, scroll through commits, search old terminal sessions, try to remember what was finished, what was only investigated, and what is still in progress.
 
-During setup, choose exactly which local sources DevRecap may read:
+DevRecap does that reconstruction for you.
+
+It reads your local coding-agent history and Git activity, correlates the evidence, separates completed work from unfinished work, and turns the result into a presentation-ready recap.
+
+**Not a timesheet. Not background monitoring. A recap you explicitly ask for when you need it.**
+
+## The rule
+
+> **Evidence first. If DevRecap cannot support a claim from the collected evidence, it must not present it as completed.**
+
+A file edit is not automatically a finished feature.  
+A command is not automatically a delivered fix.  
+A conversation is not automatically proof that something shipped.
+
+DevRecap combines session evidence with Git history and keeps uncertain work uncertain.
+
+## Before / after
+
+Without DevRecap:
 
 ```text
-DevRecap setup
-
-[ ] Codex session history
-[ ] Claude Code session history
-[ ] Git history for detected projects
+I think I worked on the PDF flow...
+There were some DocuSign changes...
+I also fixed something in the frontend.
 ```
 
-The selection is saved locally in `~/.devrecap/config.json` (or the path set by `DEVRECAP_CONFIG`). No local collector runs before this configuration exists.
+With DevRecap:
 
-### Terminal commands
+```text
+This week
+
+Completed
+• Improved the contract-generation flow and correlated the work with Git commits.
+• Fixed frontend behavior in the product-selection journey.
+• Added report-generation improvements backed by session and repository evidence.
+
+In progress
+• PDF/AcroForm integration remains under active development.
+
+Technical areas
+Vue · PDF · DocuSign · Git · Node.js
+```
+
+The goal is not to make your week sound busier.
+
+The goal is to make it **accurate, useful, and easy to present**.
+
+## How it works
+
+```text
+You ask for a recap
+        ↓
+DevRecap resolves the requested period
+        ↓
+Local Codex + Claude sessions
+        +
+Relevant Git repositories / commits
+        ↓
+Normalize events
+        ↓
+Group meaningful activities
+        ↓
+Correlate session activity with Git evidence
+        ↓
+Build an evidence-only analysis contract
+        ↓
+Coding agent analyzes the allowed facts
+        ↓
+Validate the analysis
+        ↓
+HTML report
+        ↓
+Optional PDF
+```
+
+The coding agent is the writing layer.
+
+The DevRecap CLI is the factual layer.
+
+That separation is intentional.
+
+## Quick start
+
+### Requirements
+
+- **Node.js 24 LTS or newer**
+- **Git**
+- Optional: **Chrome / Chromium** for direct PDF generation
+
+Clone the repository:
 
 ```bash
-# Simple time ranges
-npm run recap -- today
-npm run recap -- week
-npm run recap -- month
+git clone https://github.com/jquinteiroo/devrecap.git
+cd devrecap
+npm run setup
+```
 
-# Product-oriented recaps
-npm run recap -- daily
-npm run recap -- remember "last 14 days"
-npm run recap -- review --from 2026-09-01 --to 2026-09-12
+Run DevRecap directly from the repository:
 
-# Legacy free-form mode remains supported
+```bash
 npm run recap -- "essa semana"
 ```
 
-`daily` uses a short spoken-style report. `remember` defaults to a detailed Help Me Remember report. `review` produces a professional review-oriented recap.
+Or link the CLI globally while developing:
 
-Every direct report prints a concise recap in the terminal and also writes a presentation-ready HTML report.
-
----
-
-## Skill workflow
-
-DevRecap ships Skill definitions for coding agents. The core architecture is:
-
-```text
-DevRecap CLI = factual layer
-Coding agent = language / analysis layer
+```bash
+npm link
 ```
 
-The Skill never asks an agent to infer work from raw transcripts. Instead it runs:
+Then:
+
+```bash
+devrecap "essa semana"
+```
+
+The generated HTML report is written to `reports/`.
+
+## Usage
+
+Ask naturally:
+
+```bash
+devrecap "hoje"
+```
+
+```bash
+devrecap "essa semana"
+```
+
+```bash
+devrecap "últimos 7 dias"
+```
+
+Choose a reporting style:
+
+```bash
+devrecap "essa semana" --style executive
+```
+
+```bash
+devrecap "essa semana" --style technical
+```
+
+Control the amount of detail:
+
+```bash
+devrecap "últimos 14 dias" --length detailed
+```
+
+Choose an exact period:
+
+```bash
+devrecap --from 2026-09-01 --to 2026-09-12
+```
+
+Generate HTML and request a PDF:
+
+```bash
+devrecap "essa semana" \
+  --out reports/week.html \
+  --pdf reports/week.pdf
+```
+
+Disable individual evidence sources when needed:
+
+```bash
+devrecap "essa semana" --no-claude
+devrecap "essa semana" --no-codex
+devrecap "essa semana" --no-git
+```
+
+## Use it as a skill
+
+DevRecap ships with skill definitions for coding agents.
+
+```text
+.agents/skills/devrecap/
+.claude/skills/devrecap/
+```
+
+When the skill is available to the agent, invoke DevRecap explicitly.
+
+### Codex / agent skill
+
+```text
+$devrecap
+```
+
+Or ask for a specific recap:
+
+```text
+$devrecap essa semana
+```
+
+The skill follows an evidence-controlled workflow:
 
 ```text
 devrecap prepare
       ↓
-accepted Activities + evidence-backed contract
+.devrecap/run.json
       ↓
-agent analyzes only allowed facts
+agent analyzes contract.facts only
+      ↓
+.devrecap/analysis.json
       ↓
 devrecap render
+      ↓
+report.html / report.pdf
 ```
 
-Inside this repository:
+The agent is instructed to:
+
+- analyze only the facts exposed by DevRecap;
+- reference valid activity IDs;
+- never promote `in_progress`, `blocked`, or `unknown` work to completed;
+- prefer outcomes, fixes, features, investigations, validation, blockers, and next steps over command-by-command narration;
+- avoid exposing raw transcripts, credentials, or secrets.
+
+## CLI workflow
+
+### One command
+
+For the deterministic flow:
 
 ```bash
-npm run recap -- prepare --request "this week" --out .devrecap/run.json
-npm run recap -- render --run .devrecap/run.json --analysis .devrecap/analysis.json --out reports/devrecap.html
+devrecap "essa semana"
 ```
 
-If setup has not been completed, `prepare` stops before any collector is invoked and asks the user to run `devrecap setup`.
+### Prepare
 
----
+Collect and structure the evidence:
 
-## Privacy model
+```bash
+devrecap prepare \
+  --request "essa semana" \
+  --out .devrecap/run.json
+```
 
-### CLI / Skill mode
+`run.json` contains the structured report input, source counts, the evidence contract, and the prompt used by the skill.
 
-Local collection is **explicit, source-by-source, and read-only**.
+### Analyze
 
-After authorization, DevRecap may read:
-
-- Codex session JSONL under the configured Codex home;
-- Claude Code session JSONL under the user's Claude projects directory;
-- Git metadata for detected project directories.
-
-DevRecap CLI does **not**:
-
-- modify Codex or Claude history;
-- create filesystem watchers or background sync;
-- run project/application code;
-- execute commands found inside transcripts;
-- run mutating Git commands;
-- upload raw transcripts automatically.
-
-Git access is protected by a centralized read-only allowlist. Current allowed query shapes are limited to operations such as `rev-parse --show-toplevel`, reading Git identity, `git log`, `remote get-url origin`, and `branch --show-current`. Commands such as `add`, `commit`, `push`, `pull`, `switch`, `checkout`, `reset`, `restore`, `merge`, `rebase`, and `clean` are refused before Git is invoked.
-
-### Web mode
-
-The web application remains **manual-import only**.
+When DevRecap is running as a skill, the coding agent reads the prepared contract and writes:
 
 ```text
-select file
-  ↓
-upload to local DevRecap storage
-  ↓
-explicit Analyze click
-  ↓
-parse → Activities → Evidence → Workstreams → Reports
+.devrecap/analysis.json
 ```
 
-The web server does not automatically inspect `~/.codex`, `~/.claude`, or repositories.
+Only evidence exposed through the contract should be used.
 
----
+### Render
 
-## How the evidence pipeline works
+```bash
+devrecap render \
+  --run .devrecap/run.json \
+  --analysis .devrecap/analysis.json \
+  --out reports/devrecap.html
+```
+
+With PDF:
+
+```bash
+devrecap render \
+  --run .devrecap/run.json \
+  --analysis .devrecap/analysis.json \
+  --out reports/devrecap.html \
+  --pdf reports/devrecap.pdf
+```
+
+If Chrome or Chromium is not available, DevRecap keeps the print-ready HTML instead of failing the report.
+
+## What DevRecap looks at
+
+### Codex
+
+DevRecap can collect local Codex session history inside the requested time range.
+
+### Claude
+
+Claude coding sessions can be included in the same recap, letting work performed across agents appear in one report.
+
+### Git
+
+DevRecap discovers relevant project directories and correlates session activity with Git commits.
+
+Commit evidence is especially useful for distinguishing:
 
 ```text
-Codex / Claude / Git facts
-        ↓
-Raw events
-        ↓
-Normalization + classification
-        ↓
-TaskCandidates
-        ↓
-Evidence-backed Activities
-        ↓
-TopicProfiles
-        ↓
-Objective-based Workstreams
-        ↓
-ReportContext / analysis contract
-        ↓
-Deterministic or agent-assisted wording
-        ↓
-Traceable recap
+worked on it
 ```
 
-DevRecap prefers uncertainty over invented completion. File edits or commands alone are not enough to claim delivery; completion requires stronger independent evidence.
+from:
 
----
+```text
+there is evidence that this work was completed
+```
 
-## Web application
+## What it does not do
 
-Run the visual interface with:
+DevRecap is **explicit-invocation only**.
+
+It does not need to sit in the background watching everything you do.
+
+No background productivity tracking.  
+No hidden activity score.  
+No fake certainty.
+
+You ask for a recap. DevRecap reconstructs one from the available evidence.
+
+## Report styles
+
+| Style | Best for |
+|---|---|
+| `professional` | General work recaps and weekly reports |
+| `executive` | Stakeholders, managers and higher-level summaries |
+| `technical` | Engineering-focused reports with implementation context |
+| `spoken` | Standups, demos and something you can read out loud |
+
+Lengths:
+
+```text
+short
+normal
+detailed
+```
+
+Languages are inferred from the request, with support for English and Brazilian Portuguese in the CLI flow.
+
+## Architecture
+
+```text
+devrecap/
+├── .agents/
+│   └── skills/
+│       └── devrecap/
+│           └── SKILL.md
+│
+├── .claude/
+│   └── skills/
+│       └── devrecap/
+│
+├── apps/
+│   ├── cli/              # terminal interface
+│   ├── server/           # local API / application server
+│   └── web/              # web interface
+│
+├── packages/
+│   ├── collectors/       # Codex, Claude and Git collection
+│   ├── activity-engine/  # normalization, grouping and correlation
+│   ├── report-engine/    # contracts, analysis validation and rendering
+│   └── shared/           # shared types and utilities
+│
+├── tests/
+├── scripts/
+└── package.json
+```
+
+The runtime is intentionally lightweight and currently relies heavily on Node.js built-ins, including `node:sqlite`, `node:http`, `node:test`, `node:zlib`, and `fetch`.
+
+## Why evidence matters
+
+Developer activity is messy.
+
+A single task may appear across:
+
+- several Codex sessions;
+- a Claude session;
+- multiple files;
+- failing tests;
+- a later successful test;
+- one or more Git commits.
+
+A naive summary sees these as unrelated events.
+
+DevRecap tries to reconstruct the **workstream**.
+
+That makes the output more useful for:
+
+- daily standups;
+- weekly recaps;
+- sprint reviews;
+- performance reviews;
+- project handoffs;
+- personal work journals;
+- remembering what happened after a long week.
+
+## Development
+
+Setup workspace links:
+
+```bash
+npm run setup
+```
+
+Run the CLI:
+
+```bash
+npm run recap -- "essa semana"
+```
+
+Run the local app:
 
 ```bash
 npm run dev
-# http://localhost:3737
 ```
 
-The web app supports manual imports (`.jsonl`, `.json`, `.txt`, `.gz`, `.zip`), Timeline, Review Inbox, evidence inspection, import diagnostics, Projects, Search, and report generation.
+Run the test suite:
 
-Imported files are copied into DevRecap's own local storage and the originals are never modified. Deleting an import removes its derived activities/evidence and DevRecap's stored copy.
-
----
-
-## Reports and optional AI
-
-Deterministic report generation is the default. The web report engine also supports optional OpenAI-compatible / Ollama semantic composition using a sanitized `ReportContext` only.
-
-External AI is consent-gated: the server requires approval tied to the exact sanitized payload digest that was previewed. Raw session files, full command output, source code, credentials, and repository contents are not sent as composer input.
-
-The terminal Skill model is separate: the CLI prepares an evidence-backed contract and the coding agent is instructed to analyze only the allowed facts.
-
----
-
-## Useful scripts
-
-| Command | Purpose |
-|---|---|
-| `npm run setup` | Link local workspace packages |
-| `npm run recap -- ...` | Run the terminal CLI |
-| `npm run dev` | Start local web UI/API |
-| `npm test` | Run the full Node test suite |
-| `npm run smoke` | Server health smoke test |
-| `npm run typecheck` | Type-check when TypeScript tooling is installed |
-
----
-
-## Repository layout
-
-```text
-apps/
-  cli/       terminal-first DevRecap commands + Skill factual layer
-  server/    local API + manual import orchestrator
-  web/       visual interface
-packages/
-  collectors/      authorized Codex / Claude / read-only Git collection
-  codex-parser/    Codex rollout parsing
-  git-parser/      Git-log text parsing
-  activity-engine/ normalization, evidence, Activities, TopicProfiles
-  report-engine/   Workstreams, contracts, report composition/validation
-  import-core/     manual web import safety/storage
-  shared/          domain types, SQLite, settings, validation
-.agents/skills/devrecap/   agent Skill definition
-.claude/skills/devrecap/   Claude Skill definition
+```bash
+npm test
 ```
 
----
+Type-check:
 
-## Current product direction
-
-DevRecap is becoming a **developer Skill you can live in from the terminal**:
-
-```text
-devrecap setup
-devrecap sources
-devrecap today
-devrecap daily
-devrecap remember
-devrecap review
+```bash
+npm run typecheck
 ```
 
-The web UI remains the advanced visual/audit interface. Distribution through a published npm package, `npx`, and a dedicated `devrecap skill install` workflow is planned as a later productization phase after the terminal behavior is stable.
+Smoke test:
+
+```bash
+npm run smoke
+```
+
+## Principles
+
+DevRecap is built around a few simple ideas:
+
+1. **Evidence over memory.**
+2. **Outcomes over command logs.**
+3. **Uncertainty should stay uncertain.**
+4. **Local development history is useful context, not a productivity score.**
+5. **The agent should improve the writing — never invent the facts.**
+
+## Contributing
+
+Issues, ideas, integrations, report styles, collectors, and improvements are welcome.
+
+If DevRecap becomes useful in your workflow, consider starring the repository. It helps other developers discover the project.
+
+## License
+
+MIT.
+
+---
+
+<p align="center">
+  <strong>You already did the work.</strong><br>
+  DevRecap helps you remember what the evidence says you did.
+</p>
