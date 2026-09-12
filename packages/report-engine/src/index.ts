@@ -7,7 +7,18 @@ export * from "./language.ts";
 export * from "./context.ts";
 export * from "./validate.ts";
 export * from "./composer.ts";
-export * from "./analysis.ts";
+export {
+  buildAnalysisContract,
+  buildAnalysisPrompt,
+  type AnalysisItem,
+  type ReportAnalysis,
+  type AnalysisOptions,
+  type AnalysisContract,
+} from "./analysis.ts";
+export {
+  buildDeterministicAnalysis,
+  validateReportAnalysis,
+} from "./analysis-quality.ts";
 export * from "./html.ts";
 
 // NOTE: report composition goes through the Semantic Composer path
